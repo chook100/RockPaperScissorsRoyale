@@ -27,60 +27,76 @@ body, html {
     opacity: 0.8;
 }
 
-#toggle_sound{
-    position:absolute;
-    top: 5px;
-    left: 5px;
-    width: 20px;
-    height: 20px;
-    opacity: 0.5;
+
+
+.clickable{
+    padding: 2px;
+    opacity: 0.4;
+    user-select: none;
 }
 
-#toggle_sound:hover{
+.clickable:hover{
     opacity: 1;
     cursor: pointer
 }
 
-.slider{
+.vertical_layout{
+    display: flex;
+    flex-direction: column;
+
+    margin: 3px;
+    padding: 2px;
+}
+
+.vertical_layout >*{
+    flex: 1;
+}
+
+#settings{
+    color: rgb(35, 23, 43);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    font-weight: bold;
+
     position: absolute;
-    width: 25%;
-    left: 0%;
+    top: 35px;
+    left: 5px;
+    width: 200px;
+    height: auto;
 
-    -webkit-appearance: none;
-    appearance: none;
+    display: none;
+    flex-direction: column;
 
-    height: 20px;
-
-    background: "#F2F0EF";
-    opacity: 80%;
-    outline: none;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-
-    border-radius: 8px;
+    background-color: #dfdddc;
+    border-radius: 10px;
+    opacity: .8
 }
 
-.slider:hover {
-  opacity: 1;
+#menu_container{
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: auto;
+    height: auto;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 8px;
-  background: #000000;
-  opacity: 0.8;
-  cursor: pointer;
+.number_input{
+    color: rgb(35, 23, 43);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    font-weight: 600;
+
+    border: none;
+    border-radius: 6px;
 }
 
-#speed_slider{
-    bottom: 2%;
-}
-
-#count_slider{
-    bottom: 0%
+.number_input:hover{
+    outline:auto
 }
 
 .center_vertically{

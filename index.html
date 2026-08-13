@@ -5,21 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=volume_up,volume_off"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=volume_up,volume_off,settings,close_small"/>
 
     <title>Rock, Paper, Scissors Royale</title>
     <link rel="icon", type="image/x-icon", href="icon.png">
 </head>
 <body>
-     <canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
-     <label id="timer">Loading...</label>
+    <label id="timer">Loading...</label>
 
-     <span class="material-symbols-outlined" id="toggle_sound">volume_up</span>
+    <div id="menu_container">
+        <span class="material-symbols-outlined clickable" id="open_settings">settings</span>
+        <span class="material-symbols-outlined clickable" id="toggle_sound">volume_up</span>
+    </div>
 
-     <input type="range" min="0.5" max="25" value="0.5" step="0.5" class="slider", id="speed_slider">
-     <input type="range" min="1" max="100" value="100" class="slider", id="count_slider">
+    <div id="settings">
+        <div class="vertical_layout">
+            <label>Speed</label>
+            <input type="number" min="0.1" max="25" value="0.5" step="0.1" class="number_input" id="speed_input">
+        </div>
 
-     <script src="main.js"></script>
+        <div class="vertical_layout">
+            <label>Group Count</label>
+            <input type="number" min="1" max="100" value="100" class="number_input" id="count_input">
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="main.js"></script>
 </body>
 </html>

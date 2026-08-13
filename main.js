@@ -8,6 +8,8 @@ function load_image(img, src) {
     });
 }
 
+let objects = [];
+
 let running = false;
 
 const sfx = [new Audio("paper.wav"), new Audio("scissors.wav"), new Audio("rock.wav")];
@@ -32,41 +34,43 @@ const TIMER = document.getElementById("timer")
 const CANVAS = document.getElementById("canvas")
 
 
+const SETTINGS_WINDOW = document.getElementById("settings")
 
+let settings_opened = false;
+const SETTINGS_COG = document.getElementById("open_settings")
+SETTINGS_COG.addEventListener("click", ()=>{
+    settings_opened = !settings_opened
 
+    let visibility = settings_opened ? "flex" : "none" 
+    SETTINGS_WINDOW.style.display = visibility;
+})
 
-let enable_sound = true;
+let sounds_enabled = true;
 const TOGGLE_SOUND = document.getElementById("toggle_sound")
 TOGGLE_SOUND.addEventListener("click", () => {
-    enable_sound = !enable_sound
-    enable_sound ? TOGGLE_SOUND.textContent = "volume_up" : TOGGLE_SOUND.textContent = "volume_off"
+    sounds_enabled = !sounds_enabled
+    sounds_enabled ? TOGGLE_SOUND.textContent = "volume_up" : TOGGLE_SOUND.textContent = "volume_off"
 })
 
 const ctx = CANVAS.getContext("2d")
 
 on_window_resize()
 
+let group_size = Math.floor(CANVAS.width*CANVAS.height/125000);
+let speed = 0.6
 
-let group_size = Math.floor(CANVAS.width*CANVAS.height/75000);
-let speed = 0.5
-
-
-const SPEED_SLIDER = document.getElementById("speed_slider")
-SPEED_SLIDER.value = speed
-SPEED_SLIDER.addEventListener("input", (e) => {
+const SPEED_INPUT = document.getElementById("speed_input")
+SPEED_INPUT.value = speed
+SPEED_INPUT.addEventListener("input", (e) => {
     speed = e.target.value
-    start(false)
 })
 
-const COUNT_SLIDER = document.getElementById("count_slider")
-COUNT_SLIDER.value = group_size
-COUNT_SLIDER.addEventListener("input", (e) => {
+const COUNT_INPUT = document.getElementById("count_input")
+COUNT_INPUT.value = group_size
+COUNT_INPUT.addEventListener("input", (e) => {
     group_size = Math.floor(e.target.value)
     start(false)
 })
-
-
-
 
 
 ctx.fillStyle = "#F2F0EF"
@@ -98,9 +102,8 @@ class Shape{
         this.y = y
 
         let [vx, vy] = random_dir()
-        this.vx = vx*speed;
-        this.vy = vy*speed;
-
+        this.vx = vx;
+        this.vy = vy;
 
         // tween
         this.x0;
@@ -117,8 +120,8 @@ class Shape{
     }
 
     update_pos(){
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vx*speed;
+        this.y += this.vy*speed;
     }
 
     resolve_wall_collision(){
@@ -153,7 +156,7 @@ class Shape{
     }
 
     play_sfx(){
-        if(!enable_sound)
+        if(!sounds_enabled)
             return
 
         sfx[this.type].currentTime = 0;
@@ -186,6 +189,7 @@ class Shape{
 
         if (closing <= 0) return;
 
+
         if(other.type == this.wins_against){
             other.type = this.type;
             other.wins_against = this.wins_against
@@ -197,6 +201,7 @@ class Shape{
             this.wins_against = other.wins_against
             this.play_sfx()
         }
+
 
 
         this.vx  -= closing*hit.nx;
@@ -213,18 +218,17 @@ class Shape{
         // ctx.fillStyle = "blue"
         // ctx.fillRect(this.x, this.y, Shape.SIZE, Shape.SIZE)
 
+        let ease = 1-(1-alpha)**3
 
-
-        ctx.globalAlpha = 1-alpha
+        ctx.globalAlpha = 1-ease
         ctx.drawImage(sheet, this.type_trans*512+40, 40, 432, 432, this.x-2, this.y-2, Shape.SIZE*1.1, Shape.SIZE*1.1)
-        ctx.globalAlpha = alpha
+        ctx.globalAlpha = ease
         ctx.drawImage(sheet, this.type*512+40, 40, 432, 432, this.x-2, this.y-2, Shape.SIZE*1.1, Shape.SIZE*1.1)
         ctx.globalAlpha = 1
     }
 }
 
 var ms_start;
-let objects = []
 
 let last_time = 0;
 function update(now){
@@ -300,6 +304,7 @@ function start_layout_tween(){
 
         object.x = object.x0+(object.x1-object.x0)*ease
         object.y = object.y0+(object.y1-object.y0)*ease
+
         object.resolve_wall_collision()
         object.render(ctx, alpha)
     }
@@ -333,8 +338,11 @@ function layout(){
         let lo_theta = group*2*Math.PI/3 + theta_offset;
 
         let theta = Math.random()*theta_arc+lo_theta;
-        let x = Math.cos(theta)*starting_radius;
-        let y = Math.sin(theta)*starting_radius;
+
+        let variance = .4;
+        let radius = Math.random()*starting_radius*variance+starting_radius*(1-variance)
+        let x = Math.cos(theta)*radius;
+        let y = Math.sin(theta)*radius;
 
 
         let object = objects[i];
@@ -346,16 +354,14 @@ function layout(){
         object.type_trans = object.type;
         object.type = group;
         object.wins_against = beats;
-        object.x1 = cx+x;
-        object.y1 = cy+y
+        object.x1 = cx+x-Shape.SIZE/2;
+        object.y1 = cy+y-Shape.SIZE/2;
 
         let [vx, vy] = random_dir()
-        object.vx = vx*speed;
-        object.vy = vy*speed;
+        object.vx = vx;
+        object.vy = vy;
 
     }
-
-    console.log("DONE")
 
     tween_start_ms = Date.now()
     requestAnimationFrame(start_layout_tween)
@@ -395,11 +401,10 @@ function start_countdown(){
 
     clearInterval(interval);
 
-
     TIMER.classList.add("center_vertically")
-    console.log(TIMER.classList)
 
-    let count = 3;
+    let count = 2;
+    TIMER.textContent = "3"
     interval = setInterval(() => {
         TIMER.textContent = count
 
@@ -407,6 +412,7 @@ function start_countdown(){
             ms_start = Date.now()
             TIMER.classList.remove("center_vertically")
             running = true;
+
             requestAnimationFrame(update)
             clearInterval(interval);
             return;
