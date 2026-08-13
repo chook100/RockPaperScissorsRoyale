@@ -48,7 +48,7 @@ on_window_resize()
 
 
 let group_size = Math.floor(CANVAS.width*CANVAS.height/75000);
-let speed = Math.max(CANVAS.width, CANVAS.height)/1000
+let speed = 0.5
 
 
 const SPEED_SLIDER = document.getElementById("speed_slider")
