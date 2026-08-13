@@ -13,10 +13,20 @@ sfx[0].volume = 0.1
 sfx[1].volume = 0.1
 sfx[2].volume = 0.2
 
-window.addEventListener("resize", () => {
+let group_size;
+let speed;
+let starting_radius;
+
+function on_window_resize(){
     CANVAS.width = window.innerWidth;
     CANVAS.height = window.innerHeight;
-})
+    group_size = Math.floor(CANVAS.width*CANVAS.height/75000);
+    speed = Math.floor(Math.sqrt(CANVAS.width**2+CANVAS.height**2))/3000
+
+    let min = Math.min(CANVAS.width, CANVAS.height)/2;
+    starting_radius = min-min*.1
+}
+window.addEventListener("resize", on_window_resize)
 
 window.onload = main;
 
@@ -32,8 +42,7 @@ TOGGLE_SOUND.addEventListener("click", () => {
 
 const ctx = CANVAS.getContext("2d")
 
-CANVAS.width = window.innerWidth;
-CANVAS.height = window.innerHeight;
+on_window_resize()
 
 ctx.fillStyle = "#F2F0EF"
 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -56,7 +65,6 @@ function random_dir(){
 
 class Shape{
     static SIZE = 50;
-    static SPEED = .75;
 
     constructor(type, wins_against, x, y){
         this.type = type
@@ -65,8 +73,8 @@ class Shape{
         this.y = y
 
         let [vx, vy] = random_dir()
-        this.vx = vx*Shape.SPEED;
-        this.vy = vy*Shape.SPEED;
+        this.vx = vx*speed;
+        this.vy = vy*speed;
 
 
         // tween
@@ -252,8 +260,10 @@ function start_layout_tween(){
 
 
     for(const object of objects){
-        object.x = object.x0+(object.x1-object.x0)*alpha
-        object.y = object.y0+(object.y1-object.y0)*alpha
+        let ease = 1-(1-alpha)**3
+
+        object.x = object.x0+(object.x1-object.x0)*ease
+        object.y = object.y0+(object.y1-object.y0)*ease
         object.resolve_wall_collision()
         object.render(ctx, alpha)
     }
@@ -270,10 +280,10 @@ function layout(){
     let cx = CANVAS.width/2
     let cy = CANVAS.height/2
 
-    let theta_arc = 2*Math.PI/8;
+    let theta_arc = 2*Math.PI/4;
     let object_length = objects.length
 
-    let group_size = 30;
+    let theta_offset = Math.random()*2*Math.PI/3;
 
     objects.length = group_size*3
     for(let i = 0; i < group_size*3; i++){
@@ -282,11 +292,11 @@ function layout(){
 
         console.log(group, beats)
 
-        let lo_theta = group*2*Math.PI/3 + Math.random()*2*Math.PI/3;
+        let lo_theta = group*2*Math.PI/3 + theta_offset;
 
         let theta = Math.random()*theta_arc+lo_theta;
-        let x = Math.cos(theta)*500;
-        let y = Math.sin(theta)*500;
+        let x = Math.cos(theta)*starting_radius;
+        let y = Math.sin(theta)*starting_radius;
 
 
         if(i >= object_length){
@@ -319,11 +329,6 @@ function start(){
 
     layout()
 
-
-
-    for(const object of objects){
-        object.resolve_wall_collision();
-    }
 
     for(const object of objects){
         object.render(ctx)
