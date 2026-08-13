@@ -383,12 +383,17 @@ function start_countdown(){
 
     clearInterval(interval);
 
+
+    TIMER.classList.add("center_vertically")
+    console.log(TIMER.classList)
+
     let count = 3;
     interval = setInterval(() => {
         TIMER.textContent = count
 
         if (count === 0) {
             ms_start = Date.now()
+            TIMER.classList.remove("center_vertically")
             running = true;
             requestAnimationFrame(update)
             clearInterval(interval);
