@@ -40,3 +40,45 @@ body, html {
     opacity: 1;
     cursor: pointer
 }
+
+.slider{
+    position: absolute;
+    width: 25%;
+    left: 0%;
+
+    -webkit-appearance: none;
+    appearance: none;
+
+    height: 20px;
+
+    background: "#F2F0EF";
+    opacity: 80%;
+    outline: none;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+
+    border-radius: 8px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 8px;
+  background: #000000;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+#speed_slider{
+    bottom: 2%;
+}
+
+#count_slider{
+    bottom: 0%
+}

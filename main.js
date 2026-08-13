@@ -8,21 +8,19 @@ function load_image(img, src) {
     });
 }
 
+let running = false;
+
 const sfx = [new Audio("paper.wav"), new Audio("scissors.wav"), new Audio("rock.wav")];
 sfx[0].volume = 0.1
 sfx[1].volume = 0.1
 sfx[2].volume = 0.2
 
-let group_size;
-let speed;
+
 let starting_radius;
 
 function on_window_resize(){
     CANVAS.width = window.innerWidth;
     CANVAS.height = window.innerHeight;
-    group_size = Math.floor(CANVAS.width*CANVAS.height/75000);
-    speed = Math.floor(Math.sqrt(CANVAS.width**2+CANVAS.height**2))/3000
-
     let min = Math.min(CANVAS.width, CANVAS.height)/2;
     starting_radius = min-min*.1
 }
@@ -32,6 +30,10 @@ window.onload = main;
 
 const TIMER = document.getElementById("timer")
 const CANVAS = document.getElementById("canvas")
+
+
+
+
 
 let enable_sound = true;
 const TOGGLE_SOUND = document.getElementById("toggle_sound")
@@ -43,6 +45,29 @@ TOGGLE_SOUND.addEventListener("click", () => {
 const ctx = CANVAS.getContext("2d")
 
 on_window_resize()
+
+
+let group_size = Math.floor(CANVAS.width*CANVAS.height/75000);
+let speed = Math.max(CANVAS.width, CANVAS.height)/1000
+
+
+const SPEED_SLIDER = document.getElementById("speed_slider")
+SPEED_SLIDER.value = speed
+SPEED_SLIDER.addEventListener("input", (e) => {
+    speed = e.target.value
+    start(true)
+})
+
+const COUNT_SLIDER = document.getElementById("count_slider")
+COUNT_SLIDER.value = group_size
+COUNT_SLIDER.addEventListener("input", (e) => {
+    group_size = e.target.value
+    start(true)
+})
+
+
+
+
 
 ctx.fillStyle = "#F2F0EF"
 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -203,6 +228,10 @@ let objects = []
 
 let last_time = 0;
 function update(now){
+    if(!running)
+        return;
+
+
     ctx.fillStyle = "#F2F0EF"
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -310,6 +339,10 @@ function layout(){
         objects[i].wins_against = beats;
         objects[i].x1 = cx+x;
         objects[i].y1 = cy+y
+
+        let [vx, vy] = random_dir()
+        objects[i].vx = vx*speed;
+        objects[i].vy = vy*speed;
     }
 
     tween_start_ms = Date.now()
@@ -322,7 +355,8 @@ function layout(){
 // }
 
 
-function start(){
+function start(skip_countdown = false){
+    running = false;
     ctx.fillStyle = "#F2F0EF"
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -334,18 +368,28 @@ function start(){
         object.render(ctx)
     }
 
+    if(skip_countdown){
+        running = true;
+        requestAnimationFrame(update)
+        return;
+    }
+
     start_countdown()
 }
 
+let interval;
 function start_countdown(){
     
 
+    clearInterval(interval);
+
     let count = 3;
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
         TIMER.textContent = count
 
         if (count === 0) {
             ms_start = Date.now()
+            running = true;
             requestAnimationFrame(update)
             clearInterval(interval);
             return;
