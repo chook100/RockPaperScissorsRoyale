@@ -55,14 +55,14 @@ const SPEED_SLIDER = document.getElementById("speed_slider")
 SPEED_SLIDER.value = speed
 SPEED_SLIDER.addEventListener("input", (e) => {
     speed = e.target.value
-    start(true)
+    start(false)
 })
 
 const COUNT_SLIDER = document.getElementById("count_slider")
 COUNT_SLIDER.value = group_size
 COUNT_SLIDER.addEventListener("input", (e) => {
-    group_size = e.target.value
-    start(true)
+    group_size = Math.floor(e.target.value)
+    start(false)
 })
 
 
@@ -250,9 +250,16 @@ function update(now){
         object.update_pos();
     }
 
-    for (let i = 0; i < objects.length; i++)
-        for (let j = i + 1; j < objects.length; j++)
+    for (let i = 0; i < objects.length; i++){
+        for (let j = i + 1; j < objects.length; j++){
+            if(!running) // weird edge case where this is taking a while to run, and cuts into the slider reset time
+                return
+
             objects[i].resolve_object_collision(objects[j]);
+        }
+    }
+
+            
 
     for(const object of objects){
         object.resolve_wall_collision();
@@ -309,17 +316,19 @@ function layout(){
     let cx = CANVAS.width/2
     let cy = CANVAS.height/2
 
-    let theta_arc = 2*Math.PI/4;
+    let theta_arc = 2*Math.PI/6;
     let object_length = objects.length
 
     let theta_offset = Math.random()*2*Math.PI/3;
 
-    objects.length = group_size*3
-    for(let i = 0; i < group_size*3; i++){
-        let group = Math.floor(i / group_size);
-        let beats = ((group-1 % 3) + 3) % 3;
+    let n = group_size*3;
 
-        console.log(group, beats)
+    if(objects.length > n) objects.splice(n)
+
+    for(let i = 0; i < n; i++){
+        let group = Math.floor(i / group_size);
+        let beats = (group+2)%3;
+
 
         let lo_theta = group*2*Math.PI/3 + theta_offset;
 
@@ -328,22 +337,25 @@ function layout(){
         let y = Math.sin(theta)*starting_radius;
 
 
-        if(i >= object_length){
-            objects[i] = new Shape(type=group, wins_against=beats, cx, cy)
-        }
-        objects[i].x0 = objects[i].x;
-        objects[i].y0 = objects[i].y;
+        let object = objects[i];
+        if(!object) object = objects[i] = new Shape(group, beats, cx, cy)
 
-        objects[i].type_trans = objects[i].type;
-        objects[i].type = group;
-        objects[i].wins_against = beats;
-        objects[i].x1 = cx+x;
-        objects[i].y1 = cy+y
+        object.x0 = object.x;
+        object.y0 = object.y;
+
+        object.type_trans = object.type;
+        object.type = group;
+        object.wins_against = beats;
+        object.x1 = cx+x;
+        object.y1 = cy+y
 
         let [vx, vy] = random_dir()
-        objects[i].vx = vx*speed;
-        objects[i].vy = vy*speed;
+        object.vx = vx*speed;
+        object.vy = vy*speed;
+
     }
+
+    console.log("DONE")
 
     tween_start_ms = Date.now()
     requestAnimationFrame(start_layout_tween)
