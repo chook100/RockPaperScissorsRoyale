@@ -228,6 +228,28 @@ class Shape{
     }
 }
 
+
+
+function draw_chart(rock, paper, scissors){
+    let length = objects.length
+
+    let size = 16;
+    let bottom = CANVAS.height-size
+
+    let width = CANVAS.width
+
+    ctx.fillStyle = "#6e6e6e90"
+    ctx.fillRect(0, bottom, width*rock, size)
+
+    ctx.fillStyle = "#d7d6d690"
+    ctx.fillRect(width*rock, bottom, width*paper, size)
+
+    ctx.fillStyle = "#F8445C90"
+    ctx.fillRect(width*(rock+paper), bottom, width*scissors, size)
+
+}   
+
+
 var ms_start;
 
 let last_time = 0;
@@ -272,19 +294,25 @@ function update(now){
     for(const object of objects){
         object.render(ctx);
     }
-    
 
-    let found = objects[0].type
+
+    let counts = [0,0,0]
 
     for(const object of objects){
-        if(object.type != found){
-            requestAnimationFrame(update);
-            return;
-        }
+        counts[object.type]++;
     }
 
-    setTimeout(start, 1000)
+    let length = objects.length
+    draw_chart(counts[2]/length, counts[0]/length, counts[1]/length)
 
+
+    if(counts[0] == length || counts[1] == length || counts[2] == length){
+        setTimeout(start, 1000) // restart
+    }else{
+        requestAnimationFrame(update); // update    
+    }
+
+    
 
 }
 
@@ -293,6 +321,8 @@ let tween_start_ms;
 function start_layout_tween(){
     ctx.fillStyle = "#F2F0EF"
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    draw_chart(.33333,.33333,.33333)
 
     let elapsed = Date.now()-tween_start_ms
 
@@ -378,9 +408,9 @@ function start(skip_countdown = false){
     ctx.fillStyle = "#F2F0EF"
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    draw_chart(.33333,.33333,.33333)
 
     layout()
-
 
     for(const object of objects){
         object.render(ctx)
